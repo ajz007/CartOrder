@@ -3,7 +3,10 @@ package com.scaler.capstone.cartorder.controller;
 import com.scaler.capstone.cartorder.exception.AuthException;
 import com.scaler.capstone.cartorder.exception.CartAccessDeniedException;
 import com.scaler.capstone.cartorder.exception.CartItemNotFoundException;
+import com.scaler.capstone.cartorder.exception.CartNotFoundException;
 import com.scaler.capstone.cartorder.exception.DependentServiceException;
+import com.scaler.capstone.cartorder.exception.EmptyCartCheckoutException;
+import com.scaler.capstone.cartorder.exception.OrderNotFoundException;
 import com.scaler.capstone.cartorder.exception.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +29,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler({CartItemNotFoundException.class, ProductNotFoundException.class})
+    @ExceptionHandler({
+            CartItemNotFoundException.class,
+            CartNotFoundException.class,
+            OrderNotFoundException.class,
+            ProductNotFoundException.class
+    })
     public ResponseEntity<String> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
@@ -39,6 +47,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DependentServiceException.class)
     public ResponseEntity<String> handleDependencyFailure(DependentServiceException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(EmptyCartCheckoutException.class)
+    public ResponseEntity<String> handleEmptyCartCheckout(EmptyCartCheckoutException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
