@@ -29,6 +29,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler({EmptyCartCheckoutException.class})
+    public ResponseEntity<String> handleInvalidCheckoutState(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler({
             CartItemNotFoundException.class,
             CartNotFoundException.class,
