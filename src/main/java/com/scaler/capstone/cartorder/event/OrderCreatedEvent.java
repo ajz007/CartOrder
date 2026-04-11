@@ -16,6 +16,8 @@ public class OrderCreatedEvent {
     Long cartId;
     BigDecimal totalAmount;
     String status;
+    String paymentStatus;
+    String paymentMethod;
     Instant createdAt;
     List<OrderCreatedItemEvent> items;
 }

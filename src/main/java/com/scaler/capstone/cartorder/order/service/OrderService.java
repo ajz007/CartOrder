@@ -7,6 +7,9 @@ import com.scaler.capstone.cartorder.cart.repository.CartRepository;
 import com.scaler.capstone.cartorder.exception.CartNotFoundException;
 import com.scaler.capstone.cartorder.exception.EmptyCartCheckoutException;
 import com.scaler.capstone.cartorder.exception.OrderNotFoundException;
+import com.scaler.capstone.cartorder.event.OrderCreatedEvent;
+import com.scaler.capstone.cartorder.event.OrderCreatedItemEvent;
+import com.scaler.capstone.cartorder.event.OrderEventPublisher;
 import com.scaler.capstone.cartorder.order.dto.CheckoutRequest;
 import com.scaler.capstone.cartorder.order.dto.OrderItemResponse;
 import com.scaler.capstone.cartorder.order.dto.OrderResponse;
@@ -19,6 +22,8 @@ import com.scaler.capstone.cartorder.payment.dto.PaymentSummaryResponse;
 import com.scaler.capstone.cartorder.payment.model.PaymentStatus;
 import com.scaler.capstone.cartorder.payment.model.PaymentTransaction;
 import com.scaler.capstone.cartorder.payment.repository.PaymentTransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,18 +34,23 @@ import java.util.UUID;
 @Service
 public class OrderService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
     public OrderService(
             CartRepository cartRepository,
             OrderRepository orderRepository,
-            PaymentTransactionRepository paymentTransactionRepository
+            PaymentTransactionRepository paymentTransactionRepository,
+            OrderEventPublisher orderEventPublisher
     ) {
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
+        this.orderEventPublisher = orderEventPublisher;
     }
 
     @Transactional
@@ -93,6 +103,8 @@ public class OrderService {
         paymentTransaction = paymentTransactionRepository.save(paymentTransaction);
         order = orderRepository.save(order);
         cartRepository.save(cart);
+
+        publishOrderCreatedEvent(order, paymentTransaction);
 
         return toOrderResponse(order, paymentTransaction);
     }
@@ -172,6 +184,38 @@ public class OrderService {
                 .paymentMethod(paymentTransaction.getPaymentMethod())
                 .amount(paymentTransaction.getAmount())
                 .gatewayReference(paymentTransaction.getGatewayReference())
+                .build();
+    }
+
+    private void publishOrderCreatedEvent(Order order, PaymentTransaction paymentTransaction) {
+        try {
+            OrderCreatedEvent event = OrderCreatedEvent.builder()
+                    .eventType("order.created")
+                    .orderId(order.getId())
+                    .userId(order.getUserId())
+                    .cartId(order.getCartId())
+                    .totalAmount(order.getTotalAmount())
+                    .status(order.getStatus().name())
+                    .paymentStatus(paymentTransaction.getStatus().name())
+                    .paymentMethod(paymentTransaction.getPaymentMethod().name())
+                    .createdAt(order.getCreatedAt())
+                    .items(order.getItems().stream()
+                            .map(this::toOrderCreatedItemEvent)
+                            .toList())
+                    .build();
+            orderEventPublisher.publishOrderCreated(event);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to trigger order.created event for order {}", order.getId(), ex);
+        }
+    }
+
+    private OrderCreatedItemEvent toOrderCreatedItemEvent(OrderItem orderItem) {
+        return OrderCreatedItemEvent.builder()
+                .productId(orderItem.getProductId())
+                .productTitle(orderItem.getProductTitleSnapshot())
+                .quantity(orderItem.getQuantity())
+                .unitPrice(orderItem.getUnitPrice())
+                .totalPrice(orderItem.getTotalPrice())
                 .build();
     }
 }
