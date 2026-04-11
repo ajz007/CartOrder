@@ -4,6 +4,9 @@ import com.scaler.capstone.cartorder.cart.model.Cart;
 import com.scaler.capstone.cartorder.cart.model.CartItem;
 import com.scaler.capstone.cartorder.cart.model.CartStatus;
 import com.scaler.capstone.cartorder.cart.repository.CartRepository;
+import com.scaler.capstone.cartorder.event.OrderCreatedEvent;
+import com.scaler.capstone.cartorder.event.OrderCreatedItemEvent;
+import com.scaler.capstone.cartorder.event.OrderEventPublisher;
 import com.scaler.capstone.cartorder.exception.CartNotFoundException;
 import com.scaler.capstone.cartorder.exception.EmptyCartCheckoutException;
 import com.scaler.capstone.cartorder.exception.OrderNotFoundException;
@@ -25,10 +28,16 @@ public class OrderService {
 
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
-    public OrderService(CartRepository cartRepository, OrderRepository orderRepository) {
+    public OrderService(
+            CartRepository cartRepository,
+            OrderRepository orderRepository,
+            OrderEventPublisher orderEventPublisher
+    ) {
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
+        this.orderEventPublisher = orderEventPublisher;
     }
 
     @Transactional
@@ -56,7 +65,10 @@ public class OrderService {
         cart.setStatus(CartStatus.CHECKED_OUT);
         cartRepository.save(cart);
 
-        return toOrderResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        OrderResponse response = toOrderResponse(savedOrder);
+        publishOrderCreatedEvent(response);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -119,5 +131,27 @@ public class OrderService {
                 .totalItems(totalItems)
                 .createdAt(order.getCreatedAt())
                 .build();
+    }
+
+    private void publishOrderCreatedEvent(OrderResponse response) {
+        OrderCreatedEvent event = OrderCreatedEvent.builder()
+                .eventType("order.created")
+                .orderId(response.getOrderId())
+                .userId(response.getUserId())
+                .cartId(response.getCartId())
+                .totalAmount(response.getTotalAmount())
+                .status(response.getStatus().name())
+                .createdAt(response.getCreatedAt())
+                .items(response.getItems().stream()
+                        .map(item -> OrderCreatedItemEvent.builder()
+                                .productId(item.getProductId())
+                                .productTitle(item.getProductTitle())
+                                .quantity(item.getQuantity())
+                                .unitPrice(item.getUnitPrice())
+                                .totalPrice(item.getTotalPrice())
+                                .build())
+                        .toList())
+                .build();
+        orderEventPublisher.publishOrderCreated(event);
     }
 }
