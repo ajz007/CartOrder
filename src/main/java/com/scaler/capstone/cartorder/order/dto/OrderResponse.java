@@ -14,11 +14,11 @@ import java.util.List;
 @Builder
 @Schema(description = "Detailed order response")
 public class OrderResponse {
-    @Schema(example = "101")
+    @Schema(example = "1")
     Long orderId;
     @Schema(example = "1")
     String userId;
-    @Schema(example = "55")
+    @Schema(example = "1")
     Long cartId;
     @Schema(example = "CONFIRMED")
     OrderStatus status;

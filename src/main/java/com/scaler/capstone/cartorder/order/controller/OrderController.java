@@ -4,6 +4,7 @@ import com.scaler.capstone.cartorder.order.dto.OrderResponse;
 import com.scaler.capstone.cartorder.order.dto.OrderSummaryResponse;
 import com.scaler.capstone.cartorder.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
@@ -38,7 +39,10 @@ public class OrderController {
             description = "Returns a single order and payment summary for the authenticated user.",
             tags = {"Orders", "Payments"}
     )
-    public OrderResponse getOrder(Authentication authentication, @PathVariable Long orderId) {
+    public OrderResponse getOrder(
+            Authentication authentication,
+            @Parameter(description = "Order id", example = "1") @PathVariable Long orderId
+    ) {
         return orderService.getOrder(authentication.getName(), orderId);
     }
 }

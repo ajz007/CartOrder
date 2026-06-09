@@ -5,6 +5,7 @@ import com.scaler.capstone.cartorder.cart.dto.CartResponse;
 import com.scaler.capstone.cartorder.cart.dto.UpdateCartItemRequest;
 import com.scaler.capstone.cartorder.cart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,7 +47,7 @@ public class CartController {
     @Operation(summary = "Update cart item quantity", description = "Updates the quantity of an item in the current user's active cart.")
     public CartResponse updateItem(
             Authentication authentication,
-            @PathVariable Long itemId,
+            @Parameter(description = "Cart item id", example = "1") @PathVariable Long itemId,
             @Valid @RequestBody UpdateCartItemRequest request
     ) {
         return cartService.updateItem(authentication.getName(), itemId, request);
@@ -54,7 +55,10 @@ public class CartController {
 
     @DeleteMapping("/items/{itemId}")
     @Operation(summary = "Remove cart item", description = "Removes a single item from the current user's active cart.")
-    public CartResponse removeItem(Authentication authentication, @PathVariable Long itemId) {
+    public CartResponse removeItem(
+            Authentication authentication,
+            @Parameter(description = "Cart item id", example = "1") @PathVariable Long itemId
+    ) {
         return cartService.removeItem(authentication.getName(), itemId);
     }
 

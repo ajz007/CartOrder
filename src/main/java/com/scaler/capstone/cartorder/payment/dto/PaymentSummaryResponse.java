@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @Schema(description = "Payment summary associated with an order")
 public class PaymentSummaryResponse {
-    @Schema(example = "501")
+    @Schema(example = "1")
     Long paymentId;
     @Schema(example = "SUCCESS")
     PaymentStatus status;
