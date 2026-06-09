@@ -1,6 +1,7 @@
 package com.scaler.capstone.cartorder.order.controller;
 
 import com.scaler.capstone.cartorder.order.dto.CheckoutRequest;
+import com.scaler.capstone.cartorder.order.dto.CheckoutPreviewResponse;
 import com.scaler.capstone.cartorder.order.dto.OrderResponse;
 import com.scaler.capstone.cartorder.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +23,15 @@ public class CheckoutController {
 
     public CheckoutController(OrderService orderService) {
         this.orderService = orderService;
+    }
+
+    @GetMapping("/checkout/preview")
+    @Operation(
+            summary = "Preview active cart checkout",
+            description = "Revalidates current product prices and stock, then returns the server-calculated amount breakdown."
+    )
+    public CheckoutPreviewResponse preview(Authentication authentication) {
+        return orderService.previewCheckout(authentication.getName());
     }
 
     @PostMapping("/checkout")

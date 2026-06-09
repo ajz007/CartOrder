@@ -3,6 +3,7 @@ package com.scaler.capstone.cartorder.order.dto;
 import com.scaler.capstone.cartorder.payment.model.PaymentMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import lombok.Data;
 
 @Data
@@ -16,4 +17,8 @@ public class CheckoutRequest {
     @NotNull(message = "simulateSuccess is required")
     @Schema(description = "Whether the simulated payment should succeed", example = "true")
     private Boolean simulateSuccess;
+
+    @Valid
+    @NotNull(message = "shippingAddress is required")
+    private ShippingAddressRequest shippingAddress;
 }

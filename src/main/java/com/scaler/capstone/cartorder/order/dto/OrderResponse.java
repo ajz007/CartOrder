@@ -16,7 +16,7 @@ import java.util.List;
 public class OrderResponse {
     @Schema(example = "1")
     Long orderId;
-    @Schema(example = "1")
+    @Schema(example = "demo@example.com")
     String userId;
     @Schema(example = "1")
     Long cartId;
@@ -24,7 +24,18 @@ public class OrderResponse {
     OrderStatus status;
     @Schema(example = "2499.00")
     BigDecimal totalAmount;
+    @Schema(example = "2117.80")
+    BigDecimal subtotal;
+    @Schema(example = "0.00")
+    BigDecimal discountAmount;
+    @Schema(example = "0.00")
+    BigDecimal shippingAmount;
+    @Schema(example = "381.20")
+    BigDecimal taxAmount;
+    @Schema(example = "2")
+    Integer totalItems;
     List<OrderItemResponse> items;
+    ShippingAddressResponse shippingAddress;
     Instant createdAt;
     PaymentSummaryResponse payment;
 }

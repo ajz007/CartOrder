@@ -4,6 +4,7 @@ import com.scaler.capstone.cartorder.order.model.OrderItem;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -44,6 +45,23 @@ public class Order {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount;
+
+    @Column(precision = 19, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(precision = 19, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(precision = 19, scale = 2)
+    private BigDecimal shippingAmount;
+
+    @Column(precision = 19, scale = 2)
+    private BigDecimal taxAmount;
+
+    private Integer totalItems;
+
+    @Embedded
+    private ShippingAddressSnapshot shippingAddress;
 
     @Column(nullable = false)
     private Instant createdAt;

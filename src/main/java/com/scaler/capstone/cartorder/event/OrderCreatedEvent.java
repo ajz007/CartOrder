@@ -16,7 +16,12 @@ public class OrderCreatedEvent {
     Long orderId;
     String userId;
     Long cartId;
+    BigDecimal subtotal;
+    BigDecimal discountAmount;
+    BigDecimal shippingAmount;
+    BigDecimal taxAmount;
     BigDecimal totalAmount;
+    Integer totalItems;
     String status;
     String paymentStatus;
     String paymentMethod;

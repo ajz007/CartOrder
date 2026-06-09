@@ -8,6 +8,7 @@ import com.scaler.capstone.cartorder.exception.DependentServiceException;
 import com.scaler.capstone.cartorder.exception.EmptyCartCheckoutException;
 import com.scaler.capstone.cartorder.exception.OrderNotFoundException;
 import com.scaler.capstone.cartorder.exception.ProductNotFoundException;
+import com.scaler.capstone.cartorder.exception.ProductUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -52,6 +53,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DependentServiceException.class)
     public ResponseEntity<String> handleDependencyFailure(DependentServiceException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ProductUnavailableException.class)
+    public ResponseEntity<String> handleProductUnavailable(ProductUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

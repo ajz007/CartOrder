@@ -18,5 +18,7 @@ public class OrderSummaryResponse {
     BigDecimal totalAmount;
     @Schema(example = "2")
     Integer totalItems;
+    @Schema(example = "28799.64")
+    BigDecimal taxAmount;
     Instant createdAt;
 }
